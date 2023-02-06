@@ -1,0 +1,11 @@
+.env
+venv
+*.cpython
+*.log
+*.pot
+*.pyc
+*/*/*/__pycache__/
+*/*/__pycache__/
+*/__pycache__/
+migrations
+alembic.ini

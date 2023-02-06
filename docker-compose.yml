@@ -1,0 +1,24 @@
+# docker compose up --build
+version: '3'
+
+services:
+
+  db-social_network:
+    container_name: db-social-network
+    restart: always
+    image: postgres
+    ports:
+      - 5432:5432
+    env_file:
+      - ./.env
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U postgres" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    volumes:
+      - social-network-postgresql-data:/var/lib/postgresql/data/
+
+volumes:
+  social-network-postgresql-data:
