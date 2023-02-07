@@ -18,5 +18,5 @@ Base = declarative_base()
 
 # alembic init migration
 # В файле alembic.ini прописываем URL БД
-# alembic revision --autogenerate -m 'login delete'
+# alembic revision --autogenerate -m 'l'
 # alembic upgrade head
