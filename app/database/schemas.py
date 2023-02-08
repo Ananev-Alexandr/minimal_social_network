@@ -34,7 +34,6 @@ class User(UserCreate):
         
         
 class PostIn(BaseModel):
-    id_user: int
     content: str
 
 
