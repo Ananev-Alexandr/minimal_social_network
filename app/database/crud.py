@@ -1,7 +1,6 @@
 from sqlalchemy.orm import Session
 from fastapi import HTTPException
 from . import models, schemas
-from datetime import datetime
 
 from passlib.context import CryptContext
 
@@ -43,6 +42,13 @@ def info_about_user(db: Session, id: int):
     raise HTTPException(status_code=404, detail="Id not found")
 
 
+def info_about_user_for_login(db: Session, login: str):
+    db_user = db.query(models.User).\
+        filter(models.User.login == login).one_or_none()
+    if db_user:
+        return db_user
+
+
 def login(db: Session, user: schemas.UserLogin):
     db_user = db.query(models.User).\
         filter(models.User.login == user.login).one_or_none()
@@ -52,22 +58,24 @@ def login(db: Session, user: schemas.UserLogin):
         return {"message": "Success"}
     raise HTTPException(status_code=401, detail="Login or password is wrong")
 
+
 def logout():
-    # user_is_auth = "pass"
     user_is_auth = 0
     if user_is_auth:
         return {"message": "Success logout"}
     raise HTTPException(status_code=404, detail="You are not login!")
 
-def create_post(db: Session, post: schemas.PostIn):
+
+def create_post(db: Session, post: schemas.PostIn, id_user: int):
     db_post = models.Post(
-        id_user=post.id_user,
+        id_user=id_user,
         content=post.content,
     )
     db.add(db_post)
     db.commit()
     db.refresh(db_post)
     return db_post
+
 
 def info_about_post(id: int, db: Session):
     get_post = db.query(models.Post).\
