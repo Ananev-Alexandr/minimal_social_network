@@ -1,6 +1,7 @@
 from sqlalchemy.orm import Session
 from fastapi import HTTPException
 from . import models, schemas
+from datetime import datetime
 
 from passlib.context import CryptContext
 
@@ -106,3 +107,17 @@ def like_post(id: int, user_id: int, db: Session):
         db.commit()
         db.refresh(like_post_id)
         return {"message": "You like it"}
+    
+
+def change_post(id: int, user_id: int, new_content: str, db: Session):
+    find_post = db.query(models.Post).\
+        filter(models.Post.id == id,\
+            models.Post.id_user == user_id).one_or_none()
+    if find_post:
+        db.query(models.Post).filter(models.Post.id == id)\
+            .update({models.Post.content: new_content, models.Post.publication_date: datetime.now()})
+        db.commit()
+        return find_post
+    else:
+        raise HTTPException(status_code=400, detail="Its not your post")
+

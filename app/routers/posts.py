@@ -32,3 +32,8 @@ async def info_about_post(id: int, db: Session = Depends(get_db), security = Dep
 @router.get("/like/")
 async def like_post(id: int, db: Session = Depends(get_db), security = Depends(services.get_current_user)):
     return crud.like_post(id=id, user_id=security.id, db=db)
+
+
+@router.put("/post/{id}/", response_model=schemas.PostDB)
+async def change_post(id: int, new_content: str, db: Session = Depends(get_db), security = Depends(services.get_current_user)):
+    return crud.change_post(id=id, user_id=security.id, new_content=new_content, db=db)
