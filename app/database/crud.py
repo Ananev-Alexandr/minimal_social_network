@@ -89,7 +89,11 @@ def like_post(id: int, user_id: int, db: Session):
     find_post_like = db.query(models.LikePost).\
         filter(models.LikePost.post_id == id,\
             models.LikePost.user_id == user_id).one_or_none()
-    if find_post_like:
+    get_post = db.query(models.Post).\
+        filter(models.Post.id == id, models.Post.id_user == user_id).one_or_none()
+    if get_post:
+        raise HTTPException(status_code=400, detail="You cannot like this post")
+    elif find_post_like:
         db.delete(find_post_like)
         db.commit()
         return {"message": "You delete like"}
