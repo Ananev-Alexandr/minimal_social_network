@@ -50,21 +50,21 @@ def info_about_user_for_login(db: Session, login: str):
         return db_user
 
 
-def login(db: Session, user: schemas.UserLogin):
-    db_user = db.query(models.User).\
-        filter(models.User.login == user.login).one_or_none()
-    db_user_with_pass = db_user.password
-    hash_pass = verify_password(user.password, str(db_user_with_pass))
-    if db_user and hash_pass:
-        return {"message": "Success"}
-    raise HTTPException(status_code=401, detail="Login or password is wrong")
+# def login(db: Session, user: schemas.UserLogin):
+#     db_user = db.query(models.User).\
+#         filter(models.User.login == user.login).one_or_none()
+#     db_user_with_pass = db_user.password
+#     hash_pass = verify_password(user.password, str(db_user_with_pass))
+#     if db_user and hash_pass:
+#         return {"message": "Success"}
+#     raise HTTPException(status_code=401, detail="Login or password is wrong")
 
 
-def logout():
-    user_is_auth = 0
-    if user_is_auth:
-        return {"message": "Success logout"}
-    raise HTTPException(status_code=404, detail="You are not login!")
+# def logout():
+#     user_is_auth = 0
+#     if user_is_auth:
+#         return {"message": "Success logout"}
+#     raise HTTPException(status_code=404, detail="You are not login!")
 
 
 def create_post(db: Session, post: schemas.PostIn, id_user: int):
@@ -119,5 +119,19 @@ def change_post(id: int, user_id: int, new_content: str, db: Session):
         db.commit()
         return find_post
     else:
-        raise HTTPException(status_code=403, detail="Its not your post")
+        raise HTTPException(status_code=403, detail="Its not your post, post not found")
 
+def delete_post(id: int, user_id: int, db: Session):
+    find_post = db.query(models.Post).\
+        filter(models.Post.id == id,\
+            models.Post.id_user == user_id).one_or_none()
+    if find_post:
+        post = db.query(models.Post).filter(models.Post.id == id).first()
+        like_post = db.query(models.LikePost).filter(models.LikePost.post_id == id).all()
+        db.delete(post)
+        for like in like_post:
+            db.delete(like)
+        db.commit()
+        return {"message": "Success delete!"}
+    else:
+        raise HTTPException(status_code=403, detail="Its not your post, post not found")
