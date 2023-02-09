@@ -93,7 +93,7 @@ def like_post(id: int, user_id: int, db: Session):
     get_post = db.query(models.Post).\
         filter(models.Post.id == id, models.Post.id_user == user_id).one_or_none()
     if get_post:
-        raise HTTPException(status_code=400, detail="You cannot like this post")
+        raise HTTPException(status_code=403, detail="You cannot like this post")
     elif find_post_like:
         db.delete(find_post_like)
         db.commit()
@@ -119,5 +119,5 @@ def change_post(id: int, user_id: int, new_content: str, db: Session):
         db.commit()
         return find_post
     else:
-        raise HTTPException(status_code=400, detail="Its not your post")
+        raise HTTPException(status_code=403, detail="Its not your post")
 
