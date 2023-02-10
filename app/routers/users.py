@@ -9,7 +9,6 @@ from fastapi.security import OAuth2PasswordRequestForm
 from datetime import timedelta
 
 
-
 # создание таблицы в БД
 models.Base.metadata.create_all(bind=engine)
 
