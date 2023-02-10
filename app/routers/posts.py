@@ -1,22 +1,15 @@
 from fastapi import APIRouter, Depends
 from database import crud, models, schemas
 from sqlalchemy.orm import Session
-from database.db import SessionLocal, engine
+from database.db import engine
 from Security import services
+from database.db_connect import get_db
 
 
 models.Base.metadata.create_all(bind=engine)
 
 
 router = APIRouter()
-
-
-def get_db():
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
 
 
 @router.post("/post/", response_model=schemas.PostDB)
