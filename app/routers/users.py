@@ -7,6 +7,7 @@ from Security import constants, services
 from Security.schemas import Token
 from fastapi.security import OAuth2PasswordRequestForm
 from datetime import timedelta
+from database.db_connect import get_db
 
 
 # создание таблицы в БД
@@ -14,14 +15,6 @@ models.Base.metadata.create_all(bind=engine)
 
 
 router = APIRouter()
-
-
-def get_db():
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
 
 
 @router.get("/")
