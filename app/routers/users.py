@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from database import crud, models, schemas
 from sqlalchemy.orm import Session
-from database.db import SessionLocal, engine
+from database.db import engine
 from typing import Union
 from Security import constants, services
 from Security.schemas import Token
