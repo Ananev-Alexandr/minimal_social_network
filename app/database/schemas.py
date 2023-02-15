@@ -1,6 +1,6 @@
 from pydantic import BaseModel
-from datetime import datetime
-
+from datetime import datetime, date
+from typing import Union
 
 class UserBase(BaseModel):
     login: str
@@ -43,8 +43,30 @@ class PostDB(PostIn):
     
     class Config:
         orm_mode = True
+    
+    
+class DateFilter(BaseModel):
+    start_date: Union[date, None] = None
+    end_date: Union[date, None] = None
+
+
+
+
+class FilteredPosts(BaseModel):
+    id: Union[int, None] = None
+    content: Union[str, None] = None
+    publication_date: Union[DateFilter, None] = None
+    first_name: Union[str, None] = None
+    second_name: Union[str, None] = None
         
-        
+class SortPost(BaseModel):
+    group_by: Union[str, None] = "asc"
+    sort_by: Union[str, None] = "id"
+    
+class Asda(BaseModel):
+    filters: Union[FilteredPosts, None] = None
+    group: Union[SortPost, None] = None
+    
 class LikePost(BaseModel):
     post_id: int
     
