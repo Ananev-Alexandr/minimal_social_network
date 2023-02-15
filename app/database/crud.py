@@ -68,6 +68,76 @@ def info_about_post(id: int, db: Session):
     raise HTTPException(status_code=404, detail="Id not found")
 
 
+def find_post(db: Session, schemas_filter: schemas.FilteredPosts):
+    schemas_filter, group_filters = validate_params(schemas_filter)
+    result = filter_posts(db.query(models.Post), schemas_filter)
+    result = sort_post(result, group_filters)
+    return result.all()
+   
+   
+def filter_posts(query, dict_of_filter):
+    association_table = {
+        "id": models.Post.id,
+        "content": models.Post.content,
+        "publication_date": models.Post.publication_date,
+        # "first_name": models.Post.content,
+        # "second_name": models.Post.content
+    }
+
+    for key, val in dict_of_filter.items():
+        if key == "id":
+            query = query.filter(association_table[key] == val)
+        elif key == "content":
+            query = query.filter(association_table[key].ilike(f'%{val}%'))
+        elif key == "publication_date":
+            date_range = dict(val)
+            if date_range.get("start_date"):
+                query = query.filter(association_table[key] >= date_range["start_date"])
+            if date_range.get("end_date"):
+                query = query.filter(association_table[key] <= date_range["end_date"])
+    return query
+       
+ 
+ 
+def validate_params(dict_of_filter):
+    dict_of_filter = dict(dict_of_filter)
+    if dict_of_filter.get("filters"):
+        dict_filters = dict(dict_of_filter.get("filters"))
+    if dict_of_filter.get("group"):
+        group_filters = dict(dict_of_filter["group"])
+    if dict_filters.get("publication_date"):
+        dict_filters["publication_date"] = dict(dict_filters["publication_date"])
+
+    copy_filters = dict_filters.copy()
+    for key, val in copy_filters.items():
+        if val is None:
+            del dict_filters[key]
+                
+    return dict_filters, group_filters
+    
+def sort_post(query, group_filters: dict):
+    from sqlalchemy import desc, asc
+    association_table = {
+        "id": models.Post.id,
+        "content": models.Post.content,
+        "publication_date": models.Post.publication_date,
+    }
+    sort_table = {
+        "asc": asc,
+        "desc": desc
+    }
+    asc_or_desc = sort_table.get(group_filters.get("group_by"))
+    db_column = association_table.get(group_filters.get("sort_by"))
+    query = query.order_by(asc_or_desc(db_column))
+    
+    return query 
+
+
+def paginate():
+    # TODO
+    pass
+
+
 def like_post(id: int, user_id: int, db: Session):
     find_post_like = db.query(models.LikePost).\
         filter(models.LikePost.post_id == id,\
