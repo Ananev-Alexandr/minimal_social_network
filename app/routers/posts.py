@@ -1,15 +1,11 @@
-from fastapi import APIRouter, Depends
-from database import crud, models, schemas
+from fastapi import APIRouter, Depends, Query
+from database import crud, schemas
 from sqlalchemy.orm import Session
-from database.db import engine
 from Security import services
 from database.db_connect import get_db
 
 
-models.Base.metadata.create_all(bind=engine)
-
-
-router = APIRouter()
+router = APIRouter(tags=["posts"])
 
 
 @router.post("/post/", response_model=schemas.PostDB)
@@ -20,6 +16,18 @@ async def create_post(post: schemas.PostIn, db: Session = Depends(get_db), secur
 @router.get("/post/{id}/", response_model=schemas.PostDB)
 async def info_about_post(id: int, db: Session = Depends(get_db), security = Depends(services.get_current_user)):
     return crud.info_about_post(id=id, db=db)
+
+
+@router.post("/find_post/", response_model=list[schemas.PostDB] | None)
+async def find_post(
+    filter: schemas.Asda,
+    db: Session = Depends(get_db),
+    security = Depends(services.get_current_user)
+    ):
+        return crud.find_post(
+        schemas_filter=filter,
+        db=db
+        )
 
 
 @router.get("/like/")
