@@ -1,7 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, status
-from database import crud, models, schemas
+from database import crud, schemas
 from sqlalchemy.orm import Session
-from database.db import engine
 from typing import Union
 from Security import constants, services
 from Security.schemas import Token
@@ -10,11 +9,7 @@ from datetime import timedelta
 from database.db_connect import get_db
 
 
-# создание таблицы в БД
-models.Base.metadata.create_all(bind=engine)
-
-
-router = APIRouter()
+router = APIRouter(tags=["users"])
 
 
 @router.get("/")
@@ -33,7 +28,7 @@ async def info_about_user(id: int, db: Session = Depends(get_db), security = Dep
     return crud.info_about_user(id=id, db=db)
 
 
-@router.post("/token", response_model=Token)
+@router.post("/token", response_model=Token, include_in_schema=False)
 async def login_for_access_token(db: Session = Depends(get_db), form_data: OAuth2PasswordRequestForm = Depends()):
     user = services.login(db, form_data.username, form_data.password)
     if not user:
