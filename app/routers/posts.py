@@ -18,7 +18,7 @@ async def info_about_post(id: int, db: Session = Depends(get_db), security = Dep
     return crud.info_about_post(id=id, db=db)
 
 
-@router.post("/find_post/", response_model=list[schemas.PostDB] | None)
+@router.post("/find_post/", response_model=list[schemas.FilterPostDB] | None)
 async def find_post(
     filter: schemas.Asda,
     db: Session = Depends(get_db),
