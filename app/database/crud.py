@@ -70,18 +70,32 @@ def info_about_post(id: int, db: Session):
 
 def find_post(db: Session, schemas_filter: schemas.FilteredPosts):
     schemas_filter, group_filters = validate_params(schemas_filter)
-    result = filter_posts(db.query(models.Post), schemas_filter)
+    query = db.query(models.Post, models.User).\
+        join(models.User, models.User.id == models.Post.id_user)
+    
+    
+    result = filter_posts(query, schemas_filter)
     result = sort_post(result, group_filters)
-    return result.all()
-   
-   
+    all_tables = result.all()
+    full_result_with_likes = count_likes(db=db, all_tables=all_tables)
+    return full_result_with_likes
+    
+    
+def count_likes(db: Session, all_tables):
+    full_result_with_likes = []
+    for post_table, user_table in all_tables:
+        likes = db.query(models.LikePost).filter(models.LikePost.post_id == post_table.id).count()
+        full_result_with_likes.append({"Post": post_table, "User": user_table, "likes_on_the_post": likes})
+    return full_result_with_likes
+
+
 def filter_posts(query, dict_of_filter):
     association_table = {
         "id": models.Post.id,
         "content": models.Post.content,
         "publication_date": models.Post.publication_date,
-        # "first_name": models.Post.content,
-        # "second_name": models.Post.content
+        "first_name": models.User.id == models.Post.id_user,
+        "second_name": models.User.id == models.Post.id_user
     }
 
     for key, val in dict_of_filter.items():
@@ -95,6 +109,12 @@ def filter_posts(query, dict_of_filter):
                 query = query.filter(association_table[key] >= date_range["start_date"])
             if date_range.get("end_date"):
                 query = query.filter(association_table[key] <= date_range["end_date"])
+        elif key == "first_name":
+            query = query.filter(association_table[key])
+            query = query.filter(models.User.first_name.ilike(f'%{val}%'))
+        elif key == "second_name":
+            query = query.filter(association_table[key])
+            query = query.filter(models.User.second_name.ilike(f'%{val}%'))
     return query
        
  
