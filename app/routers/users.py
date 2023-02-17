@@ -1,14 +1,14 @@
-from fastapi import APIRouter, Depends, HTTPException, status
-from database import crud, schemas
-from sqlalchemy.orm import Session
+from datetime import timedelta
 from typing import Union
+
+from database import crud, schemas
+from database.db_connect import get_db
+from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi.security import OAuth2PasswordRequestForm
+from fastapi_pagination import Page, paginate
 from Security import constants, services
 from Security.schemas import Token
-from fastapi.security import OAuth2PasswordRequestForm
-from datetime import timedelta
-from database.db_connect import get_db
-from fastapi_pagination import Page, paginate
-
+from sqlalchemy.orm import Session
 
 router = APIRouter(tags=["users"])
 
@@ -30,7 +30,7 @@ async def info_about_user(id: int, db: Session = Depends(get_db), security = Dep
 
 
 @router.post("/all_users/", response_model=Page[schemas.FilterUserOut])
-async def get_all_users(filter: schemas.FilterAndSortUsers, db: Session = Depends(get_db)):
+async def get_all_users(filter: schemas.FilterAndSortUsers, db: Session = Depends(get_db), security = Depends(services.get_current_user)):
     return paginate(crud.get_all_users(filter=filter, db=db))
 
 

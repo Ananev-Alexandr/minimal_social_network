@@ -1,10 +1,10 @@
-from sqlalchemy.orm import Session
-from fastapi import HTTPException
-from . import models, schemas
 from datetime import datetime
 
+from fastapi import HTTPException
 from passlib.context import CryptContext
+from sqlalchemy.orm import Session
 
+from . import models, schemas
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
@@ -68,7 +68,7 @@ def all_received_likes_for_user(db, db_user):
     return full_result_with_likes
 
 def group_users_with_params(query, group_filters):
-    from sqlalchemy import desc, asc
+    from sqlalchemy import asc, desc
     association_table = {
         "first_name": models.User.first_name,
         "second_name": models.User.second_name,
@@ -183,7 +183,7 @@ def validate_params(dict_of_filter):
     return dict_filters, group_filters
     
 def sort_post(query, group_filters: dict):
-    from sqlalchemy import desc, asc
+    from sqlalchemy import asc, desc
     association_table = {
         "id": models.Post.id,
         "content": models.Post.content,
@@ -206,7 +206,7 @@ def like_post(id: int, user_id: int, db: Session):
             models.LikePost.user_id == user_id).one_or_none()
     get_post = db.query(models.Post).\
         filter(models.Post.id == id, models.Post.id_user == user_id).one_or_none()
-    if get_post:
+    if get_post is None:
         raise HTTPException(status_code=403, detail="You cannot like this post")
     elif find_post_like:
         db.delete(find_post_like)

@@ -1,18 +1,15 @@
 from datetime import datetime, timedelta
 from typing import Union
 
+from database import crud, models
+from database.db import SessionLocal
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 from jose import JWTError, jwt
-
-from sqlalchemy.orm import Session
-from .constants import *
 from Security.schemas import *
-from database import models, crud
+from sqlalchemy.orm import Session
 
-
-from database.db import SessionLocal
-
+from .constants import *
 
 # to get a string like this run:
 # openssl rand -hex 32

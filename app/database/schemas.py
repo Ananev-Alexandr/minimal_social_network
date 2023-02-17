@@ -1,6 +1,8 @@
-from pydantic import BaseModel
-from datetime import datetime, date
+from datetime import date, datetime
 from typing import Union
+
+from pydantic import BaseModel
+
 
 class UserBase(BaseModel):
     login: str

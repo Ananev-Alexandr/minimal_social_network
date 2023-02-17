@@ -1,8 +1,7 @@
 from fastapi import FastAPI
-from routers.users import router as user_router
-from routers.posts import router as post_router
 from fastapi_pagination import add_pagination
-
+from routers.posts import router as post_router
+from routers.users import router as user_router
 
 app = FastAPI()
 
