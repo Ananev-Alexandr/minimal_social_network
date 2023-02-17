@@ -31,8 +31,12 @@ def create_user(db: Session, user: schemas.UserCreate):
         db.commit()
         db.refresh(db_user)
         return db_user
-    except:
-        raise HTTPException(status_code=404, detail="This username already exists, please use another one")
+    except Exception:
+        raise HTTPException(
+            status_code=404,
+            detail="This username already exists, please use another one"
+                )
+
 
 def info_about_user(db: Session, id: int):
     db_user = db.query(models.User).\
@@ -48,6 +52,7 @@ def info_about_user_for_login(db: Session, login: str):
     if db_user:
         return db_user
 
+
 def get_all_users(filter: schemas.FilterAndSortUsers, db: Session):
     schemas_filter, group_filters = validate_params(filter)
     db_user = db.query(models.User)
@@ -62,10 +67,15 @@ def all_received_likes_for_user(db, db_user):
     users = db_user.all()
     full_result_with_likes = []
     for user in users:
-        likes = db.query(models.LikePost).filter(models.LikePost.user_id == user.id).count()
-        full_result_with_likes.append({"User": user, "likes_on_the_post": likes})
-    
+        likes = db.query(models.LikePost).\
+            filter(models.LikePost.user_id == user.id).count()
+        full_result_with_likes.append({
+            "User": user,
+            "likes_on_the_post": likes
+                })
+
     return full_result_with_likes
+
 
 def group_users_with_params(query, group_filters):
     from sqlalchemy import asc, desc
@@ -80,8 +90,8 @@ def group_users_with_params(query, group_filters):
     asc_or_desc = sort_table.get(group_filters.get("group_by"))
     db_column = association_table.get(group_filters.get("sort_by"))
     query = query.order_by(asc_or_desc(db_column))
-    
-    return query 
+
+    return query
 
 
 def filter_users_with_params(query, schemas_filter):
@@ -120,19 +130,24 @@ def find_post(db: Session, schemas_filter: schemas.FilteredPosts):
     schemas_filter, group_filters = validate_params(schemas_filter)
     query = db.query(models.Post, models.User).\
         join(models.User, models.User.id == models.Post.id_user)
-    
+
     result = filter_posts(query, schemas_filter)
     result = sort_post(result, group_filters)
     all_tables = result.all()
     full_result_with_likes = count_likes(db=db, all_tables=all_tables)
     return full_result_with_likes
-    
-    
+
+
 def count_likes(db: Session, all_tables):
     full_result_with_likes = []
     for post_table, user_table in all_tables:
-        likes = db.query(models.LikePost).filter(models.LikePost.post_id == post_table.id).count()
-        full_result_with_likes.append({"Post": post_table, "User": user_table, "likes_on_the_post": likes})
+        likes = db.query(models.LikePost).\
+            filter(models.LikePost.post_id == post_table.id).count()
+        full_result_with_likes.append({
+            "Post": post_table,
+            "User": user_table,
+            "likes_on_the_post": likes
+                })
     return full_result_with_likes
 
 
@@ -153,9 +168,13 @@ def filter_posts(query, dict_of_filter):
         elif key == "publication_date":
             date_range = dict(val)
             if date_range.get("start_date"):
-                query = query.filter(association_table[key] >= date_range["start_date"])
+                query = query.filter(
+                    association_table[key] >= date_range["start_date"]
+                        )
             if date_range.get("end_date"):
-                query = query.filter(association_table[key] <= date_range["end_date"])
+                query = query.filter(
+                    association_table[key] <= date_range["end_date"]
+                        )
         elif key == "first_name":
             query = query.filter(association_table[key])
             query = query.filter(models.User.first_name.ilike(f'%{val}%'))
@@ -163,9 +182,8 @@ def filter_posts(query, dict_of_filter):
             query = query.filter(association_table[key])
             query = query.filter(models.User.second_name.ilike(f'%{val}%'))
     return query
-       
- 
- 
+
+
 def validate_params(dict_of_filter):
     dict_of_filter = dict(dict_of_filter)
     if dict_of_filter.get("filters"):
@@ -173,15 +191,18 @@ def validate_params(dict_of_filter):
     if dict_of_filter.get("group"):
         group_filters = dict(dict_of_filter["group"])
     if dict_filters.get("publication_date"):
-        dict_filters["publication_date"] = dict(dict_filters["publication_date"])
+        dict_filters["publication_date"] = dict(
+            dict_filters["publication_date"]
+                )
 
     copy_filters = dict_filters.copy()
     for key, val in copy_filters.items():
         if val is None:
             del dict_filters[key]
-                
+
     return dict_filters, group_filters
-    
+
+
 def sort_post(query, group_filters: dict):
     from sqlalchemy import asc, desc
     association_table = {
@@ -196,18 +217,26 @@ def sort_post(query, group_filters: dict):
     asc_or_desc = sort_table.get(group_filters.get("group_by"))
     db_column = association_table.get(group_filters.get("sort_by"))
     query = query.order_by(asc_or_desc(db_column))
-    
-    return query 
+
+    return query
 
 
 def like_post(id: int, user_id: int, db: Session):
     find_post_like = db.query(models.LikePost).\
-        filter(models.LikePost.post_id == id,\
-            models.LikePost.user_id == user_id).one_or_none()
+        filter(
+            models.LikePost.post_id == id,
+            models.LikePost.user_id == user_id
+                ).one_or_none()
     get_post = db.query(models.Post).\
-        filter(models.Post.id == id, models.Post.id_user == user_id).one_or_none()
+        filter(
+            models.Post.id == id,
+            models.Post.id_user == user_id
+                ).one_or_none()
     if get_post is None:
-        raise HTTPException(status_code=403, detail="You cannot like this post")
+        raise HTTPException(
+            status_code=403,
+            detail="You cannot like this post"
+                )
     elif find_post_like:
         db.delete(find_post_like)
         db.commit()
@@ -221,32 +250,46 @@ def like_post(id: int, user_id: int, db: Session):
         db.commit()
         db.refresh(like_post_id)
         return {"message": "You like it"}
-    
+
 
 def change_post(id: int, user_id: int, new_content: str, db: Session):
     find_post = db.query(models.Post).\
-        filter(models.Post.id == id,\
-            models.Post.id_user == user_id).one_or_none()
+        filter(
+            models.Post.id == id,
+            models.Post.id_user == user_id
+                ).one_or_none()
     if find_post:
         db.query(models.Post).filter(models.Post.id == id)\
-            .update({models.Post.content: new_content, models.Post.publication_date: datetime.now()})
+            .update({
+                models.Post.content: new_content,
+                models.Post.publication_date: datetime.now()
+                    })
         db.commit()
         return find_post
     else:
-        raise HTTPException(status_code=403, detail="Its not your post, post not found")
+        raise HTTPException(
+            status_code=403,
+            detail="Its not your post, post not found"
+                )
 
 
 def delete_post(id: int, user_id: int, db: Session):
     find_post = db.query(models.Post).\
-        filter(models.Post.id == id,\
-            models.Post.id_user == user_id).one_or_none()
+        filter(
+            models.Post.id == id,
+            models.Post.id_user == user_id
+                ).one_or_none()
     if find_post:
         post = db.query(models.Post).filter(models.Post.id == id).first()
-        like_post = db.query(models.LikePost).filter(models.LikePost.post_id == id).all()
+        like_post = db.query(models.LikePost).\
+            filter(models.LikePost.post_id == id).all()
         db.delete(post)
         for like in like_post:
             db.delete(like)
         db.commit()
         return {"message": "Success delete!"}
     else:
-        raise HTTPException(status_code=403, detail="Its not your post, post not found")
+        raise HTTPException(
+            status_code=403,
+            detail="Its not your post, post not found"
+                )

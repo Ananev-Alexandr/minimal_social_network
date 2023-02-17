@@ -15,7 +15,7 @@ class UserOut(BaseModel):
 
     class Config:
         orm_mode = True
-        
+
 
 class FilterUserOut(BaseModel):
     User: UserOut
@@ -38,7 +38,7 @@ class User(UserCreate):
 
     class Config:
         orm_mode = True
-        
+
 
 class FilterUsers(BaseModel):
     first_name: Union[str, None] = None
@@ -53,6 +53,7 @@ class SortUsers(BaseModel):
 class FilterAndSortUsers(BaseModel):
     filters: Union[FilterUsers, None] = None
     group: Union[SortUsers, None] = None
+
 
 class PostIn(BaseModel):
     content: str
@@ -70,7 +71,7 @@ class FilterPostDB(BaseModel):
     Post: PostDB
     User: UserOut
     likes_on_the_post: int
-    
+
     class Config:
         orm_mode = True
 
@@ -100,7 +101,6 @@ class Asda(BaseModel):
 
 class LikePost(BaseModel):
     post_id: int
-
 
 
 class LikePostPath(LikePost):

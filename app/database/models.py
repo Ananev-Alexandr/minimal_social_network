@@ -8,10 +8,18 @@ from .db import Base
 
 class LikePost(Base):
     __tablename__ = "like_table"
-    
-    post_id = Column(ForeignKey("post_table.id"), nullable=False, primary_key=True)
-    user_id = Column(ForeignKey("user_table.id"), nullable=False, primary_key=True)
-    
+
+    post_id = Column(
+        ForeignKey("post_table.id"),
+        nullable=False,
+        primary_key=True
+            )
+    user_id = Column(
+        ForeignKey("user_table.id"),
+        nullable=False,
+        primary_key=True
+            )
+
     child = relationship("Post", back_populates="parents")
     parent = relationship("User", back_populates="children")
 
@@ -35,5 +43,5 @@ class Post(Base):
     id_user = Column(Integer, ForeignKey("user_table.id"), nullable=False)
     content = Column(String, nullable=False)
     publication_date = Column(DateTime, default=datetime.now)
-    
+
     parents = relationship("LikePost", back_populates="child")
