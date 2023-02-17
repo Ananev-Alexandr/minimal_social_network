@@ -1,9 +1,9 @@
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends
 from database import crud, schemas
 from sqlalchemy.orm import Session
 from Security import services
 from database.db_connect import get_db
-
+from fastapi_pagination import Page, paginate
 
 router = APIRouter(tags=["posts"])
 
@@ -18,16 +18,16 @@ async def info_about_post(id: int, db: Session = Depends(get_db), security = Dep
     return crud.info_about_post(id=id, db=db)
 
 
-@router.post("/find_post/", response_model=list[schemas.FilterPostDB] | None)
+@router.post("/find_post/", response_model=Page[schemas.FilterPostDB])
 async def find_post(
     filter: schemas.Asda,
     db: Session = Depends(get_db),
     security = Depends(services.get_current_user)
     ):
-        return crud.find_post(
+        return paginate(crud.find_post(
         schemas_filter=filter,
         db=db
-        )
+        ))
 
 
 @router.get("/like/")
