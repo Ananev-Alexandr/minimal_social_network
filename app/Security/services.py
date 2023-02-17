@@ -1,5 +1,4 @@
 import os
-
 from datetime import datetime, timedelta
 from typing import Union
 
@@ -10,7 +9,6 @@ from fastapi.security import OAuth2PasswordBearer
 from jose import JWTError, jwt
 from Security.schemas import TokenData
 from sqlalchemy.orm import Session
-
 
 # to get a string like this run:
 # openssl rand -hex 32
