@@ -13,6 +13,11 @@ class UserOut(BaseModel):
 
     class Config:
         orm_mode = True
+        
+
+class FilterUserOut(BaseModel):
+    User: UserOut
+    likes_on_the_post: int
 
 
 class UserCreate(UserBase):
@@ -31,7 +36,21 @@ class User(UserCreate):
 
     class Config:
         orm_mode = True
+        
 
+class FilterUsers(BaseModel):
+    first_name: Union[str, None] = None
+    second_name: Union[str, None] = None
+
+
+class SortUsers(BaseModel):
+    group_by: Union[str, None] = "asc"
+    sort_by: Union[str, None] = "first_name"
+
+
+class FilterAndSortUsers(BaseModel):
+    filters: Union[FilterUsers, None] = None
+    group: Union[SortUsers, None] = None
 
 class PostIn(BaseModel):
     content: str

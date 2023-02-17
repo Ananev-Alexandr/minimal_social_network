@@ -48,6 +48,54 @@ def info_about_user_for_login(db: Session, login: str):
     if db_user:
         return db_user
 
+def get_all_users(filter: schemas.FilterAndSortUsers, db: Session):
+    schemas_filter, group_filters = validate_params(filter)
+    db_user = db.query(models.User)
+    db_user = filter_users_with_params(db_user, schemas_filter)
+    db_user = group_users_with_params(db_user, group_filters)
+    db_user = all_received_likes_for_user(db=db, db_user=db_user)
+
+    return db_user
+
+
+def all_received_likes_for_user(db, db_user):
+    users = db_user.all()
+    full_result_with_likes = []
+    for user in users:
+        likes = db.query(models.LikePost).filter(models.LikePost.user_id == user.id).count()
+        full_result_with_likes.append({"User": user, "likes_on_the_post": likes})
+    
+    return full_result_with_likes
+
+def group_users_with_params(query, group_filters):
+    from sqlalchemy import desc, asc
+    association_table = {
+        "first_name": models.User.first_name,
+        "second_name": models.User.second_name,
+    }
+    sort_table = {
+        "asc": asc,
+        "desc": desc
+    }
+    asc_or_desc = sort_table.get(group_filters.get("group_by"))
+    db_column = association_table.get(group_filters.get("sort_by"))
+    query = query.order_by(asc_or_desc(db_column))
+    
+    return query 
+
+
+def filter_users_with_params(query, schemas_filter):
+    association_table = {
+        "first_name": models.User.first_name,
+        "second_name": models.User.second_name
+    }
+    for key, val in schemas_filter.items():
+        if key == "first_name":
+            query = query.filter(association_table[key].ilike(f'%{val}%'))
+        elif key == "second_name":
+            query = query.filter(association_table[key].ilike(f'%{val}%'))
+    return query
+
 
 def create_post(db: Session, post: schemas.PostIn, id_user: int):
     db_post = models.Post(
@@ -72,7 +120,6 @@ def find_post(db: Session, schemas_filter: schemas.FilteredPosts):
     schemas_filter, group_filters = validate_params(schemas_filter)
     query = db.query(models.Post, models.User).\
         join(models.User, models.User.id == models.Post.id_user)
-    
     
     result = filter_posts(query, schemas_filter)
     result = sort_post(result, group_filters)
@@ -151,11 +198,6 @@ def sort_post(query, group_filters: dict):
     query = query.order_by(asc_or_desc(db_column))
     
     return query 
-
-
-def paginate():
-    # TODO
-    pass
 
 
 def like_post(id: int, user_id: int, db: Session):

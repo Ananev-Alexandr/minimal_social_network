@@ -7,6 +7,7 @@ from Security.schemas import Token
 from fastapi.security import OAuth2PasswordRequestForm
 from datetime import timedelta
 from database.db_connect import get_db
+from fastapi_pagination import Page, paginate
 
 
 router = APIRouter(tags=["users"])
@@ -26,6 +27,11 @@ async def create_user(user: schemas.UserCreate, db: Session = Depends(get_db)):
 @router.get("/users/{id}", response_model=Union[schemas.UserOut, None])
 async def info_about_user(id: int, db: Session = Depends(get_db), security = Depends(services.get_current_user)):
     return crud.info_about_user(id=id, db=db)
+
+
+@router.post("/all_users/", response_model=Page[schemas.FilterUserOut])
+async def get_all_users(filter: schemas.FilterAndSortUsers, db: Session = Depends(get_db)):
+    return paginate(crud.get_all_users(filter=filter, db=db))
 
 
 @router.post("/token", response_model=Token, include_in_schema=False)
