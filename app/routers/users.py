@@ -2,21 +2,21 @@ import os
 from datetime import timedelta
 from typing import Union
 
-from database import crud, schemas
-from database.db_connect import get_db
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
 from fastapi_pagination import Page, paginate
-from Security import services
-from Security.schemas import Token
 from sqlalchemy.orm import Session
+
+from app.database import crud, schemas
+from app.database.db_connect import get_db
+from app.Security import services
+from app.Security.schemas import Token
 
 router = APIRouter(tags=["users"])
 
 
 @router.get("/")
 async def hello(security=Depends(services.get_current_user)):
-    print(security)
     return {"Hello": "World"}
 
 

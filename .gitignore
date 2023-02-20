@@ -10,3 +10,4 @@ venv
 migration
 alembic.ini
 bash.exe.stackdump
+config.py

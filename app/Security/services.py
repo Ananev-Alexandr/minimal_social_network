@@ -2,13 +2,14 @@ import os
 from datetime import datetime, timedelta
 from typing import Union
 
-from database import crud, models
-from database.db import SessionLocal
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 from jose import JWTError, jwt
-from Security.schemas import TokenData
 from sqlalchemy.orm import Session
+
+from app.database import crud, models
+from app.database.db import SessionLocal
+from app.Security.schemas import TokenData
 
 # to get a string like this run:
 # openssl rand -hex 32
@@ -47,7 +48,7 @@ def create_access_token(
     to_encode.update({"exp": expire})
     encoded_jwt = jwt.encode(
         to_encode,
-        os.getenv("SECRET_KEY"),
+        os.getenv("SECRET_KEY2"),
         algorithm=os.getenv("ALGORITHM")
             )
     return encoded_jwt
@@ -65,7 +66,7 @@ async def get_current_user(
     try:
         payload = jwt.decode(
             token,
-            os.getenv("SECRET_KEY"),
+            os.getenv("SECRET_KEY2"),
             algorithms=[os.getenv("ALGORITHM")]
                 )
         username: str = payload.get("sub")

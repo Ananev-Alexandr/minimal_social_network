@@ -1,9 +1,10 @@
-from database import crud, schemas
-from database.db_connect import get_db
 from fastapi import APIRouter, Depends
 from fastapi_pagination import Page, paginate
-from Security import services
 from sqlalchemy.orm import Session
+
+from app.database import crud, schemas
+from app.database.db_connect import get_db
+from app.Security import services
 
 router = APIRouter(tags=["posts"])
 
