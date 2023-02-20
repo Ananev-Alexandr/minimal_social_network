@@ -16,7 +16,7 @@ router = APIRouter(tags=["users"])
 
 
 @router.get("/")
-async def hello(security=Depends(services.get_current_user)):
+async def hello(security=Depends(services.get_current_user)) -> dict:
     return {"Hello": "World"}
 
 

@@ -9,12 +9,12 @@ from . import models, schemas
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 
-def verify_password(plain_password, hashed_password):
+def verify_password(plain_password, hashed_password) -> bool:
     eq_pass = pwd_context.verify(plain_password, hashed_password)
     return eq_pass
 
 
-def get_password_hash(password):
+def get_password_hash(password) -> str:
     hash = pwd_context.hash(password)
     return hash
 
@@ -53,7 +53,7 @@ def info_about_user_for_login(db: Session, login: str):
         return db_user
 
 
-def get_all_users(filter: schemas.FilterAndSortUsers, db: Session):
+def get_all_users(filter: schemas.FilterAndSortUsers, db: Session) -> list:
     schemas_filter, group_filters = validate_params(filter)
     db_user = db.query(models.User)
     db_user = filter_users_with_params(db_user, schemas_filter)
@@ -63,7 +63,7 @@ def get_all_users(filter: schemas.FilterAndSortUsers, db: Session):
     return db_user
 
 
-def all_received_likes_for_user(db, db_user):
+def all_received_likes_for_user(db, db_user) -> list:
     users = db_user.all()
     full_result_with_likes = []
     for user in users:
@@ -126,7 +126,7 @@ def info_about_post(id: int, db: Session):
     raise HTTPException(status_code=404, detail="Id not found")
 
 
-def find_post(db: Session, schemas_filter: schemas.FilteredPosts):
+def find_post(db: Session, schemas_filter: schemas.FilteredPosts) -> list:
     schemas_filter, group_filters = validate_params(schemas_filter)
     query = db.query(models.Post, models.User).\
         join(models.User, models.User.id == models.Post.id_user)
@@ -138,7 +138,7 @@ def find_post(db: Session, schemas_filter: schemas.FilteredPosts):
     return full_result_with_likes
 
 
-def count_likes(db: Session, all_tables):
+def count_likes(db: Session, all_tables) -> list:
     full_result_with_likes = []
     for post_table, user_table in all_tables:
         likes = db.query(models.LikePost).\
@@ -184,7 +184,7 @@ def filter_posts(query, dict_of_filter):
     return query
 
 
-def validate_params(dict_of_filter):
+def validate_params(dict_of_filter) -> dict:
     dict_of_filter = dict(dict_of_filter)
     if dict_of_filter.get("filters"):
         dict_filters = dict(dict_of_filter.get("filters"))
