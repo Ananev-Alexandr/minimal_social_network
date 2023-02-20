@@ -2,7 +2,7 @@
 
 Blog site where users can create posts and like them.
 
-The user can register, log in and log out of the system. In addition, the creation of posts, obtaining information about the post of interest, editing your posts, liking the posts of other users, and, of course, deleting the created posts are also implemented.
+The user can register, log in and log out of the system. In addition, the creation of posts, obtaining information about the post of interest with filters and sorted, editing your posts, liking the posts of other users, and, of course, deleting the created posts are also implemented.
 
 The main interaction with the backend is to send queries to the database via SQLAlchemy. In this project, the database is PostgreSQL.
 
